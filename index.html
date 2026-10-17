@@ -1,0 +1,406 @@
+
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>อิ่มอร่อย | เมนูอาหาร</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, "Tahoma", sans-serif;
+      background: #fffaf5;
+      color: #29251f;
+    }
+
+    header {
+      background: #e96b32;
+      color: white;
+      padding: 28px 20px;
+      text-align: center;
+    }
+
+    header h1 {
+      margin: 0 0 8px;
+      font-size: 30px;
+    }
+
+    header p {
+      margin: 0;
+    }
+
+    main {
+      max-width: 1000px;
+      margin: auto;
+      padding: 24px 16px;
+    }
+
+    .search {
+      width: 100%;
+      padding: 14px;
+      border: 1px solid #e5d9cf;
+      border-radius: 12px;
+      font-size: 16px;
+      margin-bottom: 18px;
+      background: white;
+    }
+
+    .categories {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 24px;
+    }
+
+    .category {
+      padding: 10px 16px;
+      border: 1px solid #e96b32;
+      border-radius: 25px;
+      background: white;
+      color: #e96b32;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    .category.active,
+    .category:hover {
+      background: #e96b32;
+      color: white;
+    }
+
+    .menu {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .food-card {
+      background: white;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 3px 14px #0000000d;
+      cursor: pointer;
+      border: 1px solid #f0e8e0;
+      transition: transform 0.2s;
+    }
+
+    .food-card:hover {
+      transform: translateY(-3px);
+    }
+
+    .food-card img {
+      width: 100%;
+      height: 175px;
+      object-fit: cover;
+      display: block;
+      background: #f0e8e0;
+    }
+
+    .food-info {
+      padding: 14px;
+    }
+
+    .food-info h3 {
+      margin: 0 0 8px;
+      font-size: 18px;
+    }
+
+    .description {
+      font-size: 13px;
+      color: #777;
+      min-height: 36px;
+      line-height: 1.5;
+    }
+
+    .price {
+      color: #e96b32;
+      font-size: 19px;
+      font-weight: bold;
+      margin-top: 12px;
+    }
+
+    .empty {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 35px;
+      color: #777;
+    }
+
+    dialog {
+      border: none;
+      border-radius: 18px;
+      padding: 24px;
+      width: min(90%, 420px);
+      box-shadow: 0 10px 40px #0003;
+    }
+
+    dialog::backdrop {
+      background: #0007;
+    }
+
+    dialog img {
+      width: 100%;
+      max-height: 240px;
+      object-fit: cover;
+      border-radius: 12px;
+    }
+
+    .close-btn {
+      background: #e96b32;
+      color: white;
+      border: 0;
+      border-radius: 10px;
+      padding: 12px 20px;
+      cursor: pointer;
+      font-size: 15px;
+    }
+
+    footer {
+      text-align: center;
+      padding: 24px;
+      color: #888;
+      font-size: 13px;
+    }
+
+    @media (max-width: 700px) {
+      .menu {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+      }
+
+      .food-card img {
+        height: 135px;
+      }
+
+      .food-info {
+        padding: 11px;
+      }
+
+      .food-info h3 {
+        font-size: 16px;
+      }
+
+      header h1 {
+        font-size: 25px;
+      }
+    }
+
+    @media (max-width: 380px) {
+      .menu {
+        grid-template-columns: 1fr;
+      }
+
+      .food-card img {
+        height: 200px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <h1>🍽️  รวมของแซ่บ</h1>
+    <p>เมนูอาหารสดใหม่ ใหญ่ แน่น ๆ อร่อยทุกจาน</p>
+  </header>
+
+  <main>
+    <h2>เมนูอาหารของเรา </h2>
+
+    <input
+      id="search"
+      class="search"
+      type="search"
+      placeholder="🔍 ค้นหาเมนูอาหาร..."
+      aria-label="ค้นหาเมนูอาหาร"
+    >
+
+    <div class="categories" id="categories">
+      <button class="category active" data-category="ทั้งหมด">
+        ทั้งหมด
+      </button>
+      <button class="category" data-category="อาหารจานเดียว">
+        🍛 อาหารจานเดียว
+      </button>
+      <button class="category" data-category="ของทานเล่น">
+        🍟 ของทานเล่น
+      </button>
+      <button class="category" data-category="เครื่องดื่ม">
+        🥤 เครื่องดื่ม
+      </button>
+    </div>
+
+    <div class="menu" id="menu"></div>
+  </main>
+
+  <dialog id="foodDialog">
+    <div id="foodDetail"></div>
+    <button class="close-btn" id="closeDialog">
+      ปิดรายละเอียด
+    </button>
+  </dialog>
+
+  <footer>
+    © 2026 ร้านอิ่มอร่อย | ขอบคุณที่มาใช้บริการ ❤️
+  </footer>
+
+  <script>
+    // แก้ไข เพิ่ม หรือลบเมนูอาหารได้ในรายการนี้
+    const foods = [
+      {
+        name: "ข้าวผัดกุ้ง",
+        category: "อาหารจานเดียว",
+        price: 69,
+        description: "ข้าวผัดหอมกลิ่นกระทะ กุ้งเนื้อเด้ง",
+        image: "images/1.jpg"
+      },
+      {
+        name: "ผัดไทย",
+        category: "อาหารจานเดียว",
+        price: 60,
+        description: "เส้นเหนียวนุ่ม รสชาติกลมกล่อม",
+        image: "images/2.jpg"
+      },
+      {
+        name: "ข้าวไก่ทอด",
+        category: "อาหารจานเดียว",
+        price: 59,
+        description: "ไก่ทอดกรอบ เสิร์ฟพร้อมข้าวสวย",
+        image: "images/3.jpg"
+      },
+      {
+        name: "เฟรนช์ฟรายส์",
+        category: "ของทานเล่น",
+        price: 49,
+        description: "มันฝรั่งทอดกรอบ โรยเกลือเล็กน้อย",
+        image: "images/4.jpg"
+      },
+      {
+        name: "แฮมเบอร์เกอร์",
+        category: "ของทานเล่น",
+        price: 79,
+        description: "เบอร์เกอร์ชิ้นโต พร้อมผักสด",
+        image: "images/5.png"
+      },
+      {
+        name: "ชาเย็น",
+        category: "เครื่องดื่ม",
+        price: 35,
+        description: "ชาไทยหอมเข้มข้น หวานมัน",
+        image: "images/6.png"
+      }
+    ];
+
+    const menu = document.getElementById("menu");
+    const search = document.getElementById("search");
+    const categories = document.getElementById("categories");
+    const foodDialog = document.getElementById("foodDialog");
+    const foodDetail = document.getElementById("foodDetail");
+
+    let selectedCategory = "ทั้งหมด";
+
+    function renderMenu() {
+      const keyword = search.value.trim().toLowerCase();
+
+      const filteredFoods = foods.filter(food => {
+        const matchesCategory =
+          selectedCategory === "ทั้งหมด" ||
+          food.category === selectedCategory;
+
+        const matchesSearch =
+          food.name.toLowerCase().includes(keyword) ||
+          food.description.toLowerCase().includes(keyword);
+
+        return matchesCategory && matchesSearch;
+      });
+
+      if (filteredFoods.length === 0) {
+        menu.innerHTML =
+          '<p class="empty">ไม่พบเมนูอาหารที่ค้นหา 😅</p>';
+        return;
+      }
+
+      menu.innerHTML = filteredFoods.map(food => `
+        <article
+          class="food-card"
+          tabindex="0"
+          role="button"
+          aria-label="ดูรายละเอียด ${food.name}"
+          data-name="${food.name}"
+        >
+          <img
+            src="${food.image}"
+            alt="${food.name}"
+            loading="lazy"
+          >
+          <div class="food-info">
+            <h3>${food.name}</h3>
+            <div class="description">${food.description}</div>
+            <div class="price">฿${food.price}</div>
+          </div>
+        </article>
+      `).join("");
+    }
+
+    function showDetail(food) {
+      foodDetail.innerHTML = `
+        <img src="${food.image}" alt="${food.name}">
+        <h2>${food.name}</h2>
+        <p>${food.description}</p>
+        <p>หมวดหมู่: ${food.category}</p>
+        <p class="price">฿${food.price}</p>
+      `;
+
+      foodDialog.showModal();
+    }
+
+    menu.addEventListener("click", event => {
+      const card = event.target.closest(".food-card");
+      if (!card) return;
+
+      const food = foods.find(
+        item => item.name === card.dataset.name
+      );
+
+      if (food) showDetail(food);
+    });
+
+    menu.addEventListener("keydown", event => {
+      if (
+        event.target.classList.contains("food-card") &&
+        (event.key === "Enter" || event.key === " ")
+      ) {
+        event.preventDefault();
+        const food = foods.find(
+          item => item.name === event.target.dataset.name
+        );
+        if (food) showDetail(food);
+      }
+    });
+
+    categories.addEventListener("click", event => {
+      const button = event.target.closest("button");
+      if (!button) return;
+
+      selectedCategory = button.dataset.category;
+
+      document.querySelectorAll(".category").forEach(btn => {
+        btn.classList.toggle("active", btn === button);
+      });
+
+      renderMenu();
+    });
+
+    search.addEventListener("input", renderMenu);
+
+    document.getElementById("closeDialog")
+      .addEventListener("click", () => foodDialog.close());
+
+    renderMenu();
+  </script>
+</body>
+</html>
